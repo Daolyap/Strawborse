@@ -1,0 +1,42 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: radial-gradient(circle, #2a0000, #000000);
+}
+
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.creature-image {
+    max-width: 70%;
+    max-height: 70%;
+    animation: float 6s ease-in-out infinite, pulse 3s infinite alternate;
+    filter: drop-shadow(0 0 15px rgba(255, 50, 50, 0.8));
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-25px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+@keyframes pulse {
+    from {
+        filter: drop-shadow(0 0 15px rgba(255, 50, 50, 0.8));
+    }
+    to {
+        filter: drop-shadow(0 0 35px rgba(255, 100, 100, 1));
+    }
+}
