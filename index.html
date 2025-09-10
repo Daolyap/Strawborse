@@ -3,12 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strawborse</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Fruity Horses</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+    <style>
+        :root {
+            --theme-dark: #101010;
+            --theme-light: rgba(200, 200, 200, 0.8);
+            --theme-pulse: rgba(255, 255, 255, 1);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background: radial-gradient(circle, var(--theme-dark), #000000);
+            transition: background 1.5s ease;
+        }
+
+        .image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .creature-image {
+            max-width: 70%;
+            max-height: 70%;
+            filter: drop-shadow(0 0 15px var(--theme-light));
+            animation: float 6s ease-in-out infinite, pulse 3s infinite alternate;
+            transition: filter 1.5s ease;
+            opacity: 0; 
+            transition: opacity 0.5s ease;
+        }
+
+        .creature-image.loaded {
+            opacity: 1;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-25px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        @keyframes pulse {
+            from {
+                filter: drop-shadow(0 0 15px var(--theme-light));
+            }
+            to {
+                filter: drop-shadow(0 0 35px var(--theme-pulse));
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="image-container">
-        <img src="strawborse.png" alt="Strawborse." class="creature-image">
+        <img src="" alt="" class="creature-image" crossorigin="anonymous">
     </div>
+
+    <script>
+        window.onload = function() {
+            const creatureFiles = [
+                'bananorse.png',
+                'blueborse.png',
+                'courgorse.png',
+                'horange.png',
+                'horsiwi.png',
+                'tomatorse.png',
+                'strawborse.png'
+            ];
+
+            const imgElement = document.querySelector('.creature-image');
+            const colorThief = new ColorThief();
+
+            imgElement.onload = function() {
+                const dominantColor = colorThief.getColor(imgElement);
+                
+                const darkThemeColor = `rgb(${dominantColor[0] * 0.2}, ${dominantColor[1] * 0.2}, ${dominantColor[2] * 0.2})`;
+                const lightThemeColor = `rgba(${dominantColor[0]}, ${dominantColor[1]}, ${dominantColor[2]}, 0.8)`;
+                const pulseThemeColor = `rgba(${Math.min(dominantColor[0] * 1.25, 255)}, ${Math.min(dominantColor[1] * 1.25, 255)}, ${Math.min(dominantColor[2] * 1.25, 255)}, 1)`;
+                
+                const root = document.documentElement;
+                root.style.setProperty('--theme-dark', darkThemeColor);
+                root.style.setProperty('--theme-light', lightThemeColor);
+                root.style.setProperty('--theme-pulse', pulseThemeColor);
+
+                imgElement.classList.add('loaded');
+            };
+
+            const randomIndex = Math.floor(Math.random() * creatureFiles.length);
+            const selectedFile = creatureFiles[randomIndex];
+
+            const creatureName = selectedFile
+                .split('.')[0]
+                .replace('orse', ' Horse')
+                .replace(/\b\w/g, char => char.toUpperCase());
+
+            document.title = creatureName;
+            imgElement.alt = creatureName;
+            imgElement.src = 'img/' + selectedFile;
+        };
+    </script>
 </body>
 </html>
+
