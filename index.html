@@ -19,10 +19,12 @@
             overflow: hidden;
             background: radial-gradient(circle, var(--theme-dark), #000000);
             transition: background 1.5s ease;
+            font-family: 'Arial Black', Gadget, sans-serif;
         }
 
         .image-container {
             display: flex;
+            flex-direction: column; /* Allow text to be on top */
             justify-content: center;
             align-items: center;
             height: 100%;
@@ -39,6 +41,24 @@
         }
 
         .creature-image.loaded {
+            opacity: 1;
+        }
+        
+        /* New styles for the ultra-rare horse */
+        .ultra-rare-glow {
+            animation: float 6s ease-in-out infinite, majestic-glow 2.5s infinite alternate;
+        }
+
+        .rare-text {
+            color: #FFD700;
+            font-size: 2.5em;
+            text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #FFD700, 0 0 20px #FFD700;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            margin-bottom: 20px;
+        }
+
+        .rare-text.visible {
             opacity: 1;
         }
 
@@ -62,15 +82,37 @@
                 filter: drop-shadow(0 0 35px var(--theme-pulse));
             }
         }
+
+        /* New keyframe animation for the golden, majestic glow */
+        @keyframes majestic-glow {
+            0% {
+                filter: drop-shadow(0 0 20px #FFD700) drop-shadow(0 0 30px #FFF) hue-rotate(0deg);
+            }
+            100% {
+                filter: drop-shadow(0 0 35px #FFD700) drop-shadow(0 0 50px #FFF) hue-rotate(30deg);
+            }
+        }
     </style>
 </head>
 <body>
     <div class="image-container">
+        <div id="rare-text-container" class="rare-text">ULTRA RARE HORSE</div>
         <img src="" alt="" class="creature-image" crossorigin="anonymous">
     </div>
 
     <script>
         window.onload = function() {
+            // Background music setup
+            const bgMusic = new Audio('src/bg.mp3');
+            bgMusic.loop = true;
+            const playPromise = bgMusic.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Music autoplay blocked. Waiting for user interaction.");
+                    document.body.addEventListener('click', () => bgMusic.play(), { once: true });
+                });
+            }
+
             const creatureFiles = [
                 'bananorse.png',
                 'blueborse.png',
@@ -78,29 +120,50 @@
                 'horange.png',
                 'horsiwi.png',
                 'tomatorse.png',
-                'strawborse.png'
+                'strawborse.png',
             ];
+            const ultraRareFile = 'horsato.png';
 
             const imgElement = document.querySelector('.creature-image');
+            const rareTextElement = document.getElementById('rare-text-container');
             const colorThief = new ColorThief();
 
-            imgElement.onload = function() {
-                const dominantColor = colorThief.getColor(imgElement);
+            let selectedFile;
+            // Decide if the ultra-rare horse appears
+            if (Math.random() < 0.01) { // 1% chance
+                selectedFile = ultraRareFile;
                 
-                const darkThemeColor = `rgb(${dominantColor[0] * 0.2}, ${dominantColor[1] * 0.2}, ${dominantColor[2] * 0.2})`;
-                const lightThemeColor = `rgba(${dominantColor[0]}, ${dominantColor[1]}, ${dominantColor[2]}, 0.8)`;
-                const pulseThemeColor = `rgba(${Math.min(dominantColor[0] * 1.25, 255)}, ${Math.min(dominantColor[1] * 1.25, 255)}, ${Math.min(dominantColor[2] * 1.25, 255)}, 1)`;
+                // Apply special styling for the rare horse
+                imgElement.classList.add('ultra-rare-glow');
+                rareTextElement.classList.add('visible');
                 
+                // Set a majestic golden background theme
                 const root = document.documentElement;
-                root.style.setProperty('--theme-dark', darkThemeColor);
-                root.style.setProperty('--theme-light', lightThemeColor);
-                root.style.setProperty('--theme-pulse', pulseThemeColor);
+                root.style.setProperty('--theme-dark', '#4b3600'); 
+            } else {
+                // Select a regular horse
+                imgElement.classList.remove('ultra-rare-glow');
+                rareTextElement.classList.remove('visible');
 
-                imgElement.classList.add('loaded');
-            };
+                const randomIndex = Math.floor(Math.random() * creatureFiles.length);
+                selectedFile = creatureFiles[randomIndex];
 
-            const randomIndex = Math.floor(Math.random() * creatureFiles.length);
-            const selectedFile = creatureFiles[randomIndex];
+                // The onload function will handle the theme for regular horses
+                imgElement.onload = function() {
+                    const dominantColor = colorThief.getColor(imgElement);
+                    
+                    const darkThemeColor = `rgb(${dominantColor[0] * 0.2}, ${dominantColor[1] * 0.2}, ${dominantColor[2] * 0.2})`;
+                    const lightThemeColor = `rgba(${dominantColor[0]}, ${dominantColor[1]}, ${dominantColor[2]}, 0.8)`;
+                    const pulseThemeColor = `rgba(${Math.min(dominantColor[0] * 1.25, 255)}, ${Math.min(dominantColor[1] * 1.25, 255)}, ${Math.min(dominantColor[2] * 1.25, 255)}, 1)`;
+                    
+                    const root = document.documentElement;
+                    root.style.setProperty('--theme-dark', darkThemeColor);
+                    root.style.setProperty('--theme-light', lightThemeColor);
+                    root.style.setProperty('--theme-pulse', pulseThemeColor);
+
+                    imgElement.classList.add('loaded');
+                };
+            }
 
             const creatureName = selectedFile
                 .split('.')[0]
@@ -110,8 +173,14 @@
             document.title = creatureName;
             imgElement.alt = creatureName;
             imgElement.src = 'img/' + selectedFile;
+
+            // For the rare horse, the onload is simpler since the theme is fixed
+            if (selectedFile === ultraRareFile) {
+                imgElement.onload = function() {
+                    imgElement.classList.add('loaded');
+                }
+            }
         };
     </script>
 </body>
 </html>
-
